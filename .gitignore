@@ -1,0 +1,17 @@
+/*
+!_vimrc
+!.gitignore
+!/vimfiles
+
+/vimfiles/*
+!/vimfiles/autoload
+!/vimfiles/vimrc.bundles
+
+tags
+tags-*
+
+Thumbs.db
+.DS_Store
+*.pyc
+*.cache
+*.swp
