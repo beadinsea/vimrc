@@ -3,17 +3,18 @@
 " Version: 0.1
 " Email: beadinsea@163.com
 " ReadMe: README.md
-" Last_modify: 2018-05-28
+" Last_modify: 2018-06-13
 " Sections:
 "       -> Set Enviromental Variables 设置环境变量
 "       -> General Settings 基础设置
-"       -> Display Settings 展示/排版等界面格式设置
 "       -> FileEncode Settings 文件编码设置
+"       -> Import Some Functions
 "       -> HotKey Settings  自定义快捷键
 "       -> FileType Settings  针对文件类型的设置
+"       -> Terminal Setting 终端配置
 "       -> Others 其它配置
 "       -> Initial Plugin 加载插件
-"       -> Theme Settings  主题设置
+"       -> Style Settings  主题设置
 "
 "       -> 插件配置和具体设置在vimrc.bundles中
 " Note: Don't put anything in your .vimrc you don't understand!
@@ -50,16 +51,20 @@ else
 endif
 let g:VIMHome = substitute(g:VIMHome, '\\', '/', 'g')
 
-" NOTE: 以下配置有详细说明，一些特性不喜欢可以直接注解掉
+if !exists('g:config_vim_tab_style')
+	let g:config_vim_tab_style = 0
+endif
 
 "==========================================
 " General Settings 基础设置
 "==========================================
+set nocompatible
+
 set history=2000                    " history存储容量
 
 " 修改leader键
-let mapleader = ','
-let g:mapleader = ','
+let mapleader = "\<Space>"
+let g:mapleader = "\<Space>"
 
 syntax on                           " 开启语法高亮
 filetype on                         " 检测文件类型
@@ -70,7 +75,12 @@ filetype plugin indent on           " 启动自动补全
 set autoread                        " 文件修改之后自动载入
 set nobackup                        " 取消备份。 视情况自己改
 set noswapfile                      " 关闭交换文件
-set wildignore=*.swp,*.bak,*.pyc,*.class,.svn,*.o,*~
+
+set winaltkeys=no                   " Windows 禁用 ALT 操作菜单（使得 ALT 可以用到 Vim里）
+set lazyredraw                      " 延迟绘制（提升性能）
+
+set smartindent                     " Smart indent
+set autoindent                      " 打开自动缩进
 
 " 自动补全配置
 " 让Vim的补全菜单行为与一般IDE一致(参考VimTip1228)
@@ -80,10 +90,6 @@ set wildmenu                        " 增强模式中的命令行自动完成操
 " 设置 退出vim后，内容显示在终端屏幕, 可以用于查看和复制, 不需要可以去掉
 " 好处：误删什么的，如果以前屏幕打开，可以找回
 set t_ti= t_te=
-
-" 修复ctrl+m 多光标操作选择的bug，但是改变了ctrl+v进行字符选中时将包含光标下的字符
-set selection=inclusive
-set selectmode=mouse,key
 
 " 去掉输入错误的提示声音
 set novisualbell
@@ -95,31 +101,13 @@ set title                           " change the terminal's title
 set magic                           " For regular expressions turn magic on
 set viminfo^=%                      " Remember info about open buffers on close
 let &viminfofile=g:VIMHome . '/viminfo'
+set ssop-=options                   " do not store global and local values in a session
 
 " Configure backspace so it acts as it should act
 set backspace=eol,start,indent
 set whichwrap+=<,>,h,l
-set winaltkeys=no
 
-"==========================================
-" Display Settings 展示/排版等界面格式设置
-"==========================================
-set ruler                           " 显示当前的行号列号
-set showcmd                         " 在状态栏显示正在输入的命令
-set cmdheight=1                     " 命令行的高度，默认为1，这里设为2
-set showmode                        " 左下角显示当前vim模式
-set scrolloff=2                     " 在上下移动光标时，光标的上方或下方至少会保留显示的行数
-
-" 命令行（在状态行下）的高度，默认为1，这里是2
-" set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}:%{&fenc}]\ [TYPE=%Y]\ [POS=%l,%v][%p%%]\ CWD:\ %r%{getcwd()}%h\ %{strftime(\"%d/%m/%y\ -\ %H:%M\")}
-" Always show the status line - use 2 lines for the status bar
-set laststatus=2
-
-set number                          " 显示行号
-set relativenumber                  " 开启相对行号
-set nowrap                          " 取消换行
-set showmatch                       " 括号配对情况, 跳转并高亮一下匹配的括号
-set matchtime=2                     " How many tenths of a second to blink when matching brackets
+set nowrap                          " 关闭自动换行
 
 " 设置搜索
 set hlsearch                        " 高亮search命中的文本
@@ -128,25 +116,16 @@ set ignorecase                      " 搜索时忽略大小写
 set smartcase                       " 有一个或以上大写字母时仍大小写敏感
 set nowrapscan                      " 搜索到文件两端时不重新搜索
 
+set errorformat+=[%f:%l]\ ->\ %m,[%f:%l]:%m             " 错误格式
+set listchars=tab:\|\ ,trail:.,extends:>,precedes:<     " 设置分隔符可视
+
+" 设置 tags：当前文件所在目录往上向根目录搜索直到碰到 .tags 文件
+" 或者 Vim 当前目录包含 .tags 文件
+set tags=./.tags;,.tags
+
 set foldenable                      " 代码折叠
 set foldmethod=indent               " 折叠方法
 set foldlevel=99
-" 代码折叠自定义快捷键 <leader>zz
-let g:FoldMethod = 0
-map <leader>zz :call ToggleFold()<cr>
-fun! ToggleFold()
-    if g:FoldMethod == 0
-        exe "normal! zM"
-        let g:FoldMethod = 1
-    else
-        exe "normal! zR"
-        let g:FoldMethod = 0
-    endif
-endfun
-
-" 缩进配置
-set smartindent                     " Smart indent
-set autoindent                      " 打开自动缩进
 
 " tab相关变更
 set tabstop=4                       " 设置Tab键的宽度        [等同的空格个数]
@@ -157,17 +136,15 @@ set expandtab                       " 将Tab自动转化成空格[需要输入�
 set shiftround                      " 缩进时，取整 use multiple of shiftwidth when indenting with '<' and '>'
 
 set hidden                          " A buffer becomes hidden when it is abandoned
-set wildmode=list:longest
 set ttyfast
 set nrformats=                      " 00x增减数字时使用十进制
 
 "==========================================
 " FileEncode Settings 文件编码,格式
 "==========================================
-" 设置文件编码和文件格式
-set fenc=utf-8
+set fileencoding=utf-8              " 文件默认编码
 set encoding=utf-8                  " 设置新文件的编码为 UTF-8
-set fileencodings=utf-8,gbk,cp936,latin-1   " 自动判断编码时，依次尝试以下编码：
+set fileencodings=ucs-bom,utf-8,gbk,gb18030,big5,euc-jp,latin1  " 打开文件时自动尝试下面顺序的编码
 set fileformat=unix
 set fileformats=unix,mac,dos        " Use Unix as the standard file type
 if g:isWIN
@@ -182,8 +159,58 @@ set formatoptions+=m                " 如遇Unicode值大于255的文本，不�
 set formatoptions+=B                " 合并两行中文时，不在中间加空格
 
 "==========================================
+" Import Some Functions
+"==========================================
+exec 'so ' . fnameescape(g:VIMHome) . '/tools.vim'
+
+"==========================================
 " HotKey Settings  自定义快捷键设置
 "==========================================
+
+" F1 废弃这个键,防止调出系统帮助
+noremap <F1> <ESC>"
+" F2 行号开关，用于鼠标复制代码用
+nnoremap <F2> :call HideNumber()<CR>
+" F3 显示可打印字符开关
+nnoremap <F3> :set list! list?<CR>
+" F4 换行开关
+nnoremap <F4> :set wrap! wrap?<CR>
+" F6 语法开关，关闭语法可以加快大文件的展示
+nnoremap <F6> :exec exists('syntax_on') ? 'syn off' : 'syn on'<CR>
+
+"----------------------------------------------------------------------
+" window control
+"----------------------------------------------------------------------
+noremap <silent><Space>= :resize +3<CR>
+noremap <silent><Space>- :resize -3<CR>
+noremap <silent><Space>, :vertical resize -3<CR>
+noremap <silent><Space>. :vertical resize +3<CR>
+
+" window management
+noremap <Tab>h <C-w>h
+noremap <Tab>j <C-w>j
+noremap <Tab>k <C-w>k
+noremap <Tab>l <C-w>l
+noremap <Tab>w <C-w>w
+noremap <C-h> <C-w>h
+noremap <C-l> <C-w>l
+noremap <C-j> <C-w>j
+noremap <C-k> <C-w>k
+
+" 窗口切换：ALT+SHIFT+hjkl
+"----------------------------------------------------------------------
+noremap <M-H> <C-w>h
+noremap <M-L> <C-w>l
+noremap <M-J> <C-w>j
+noremap <M-K> <C-w>k
+inoremap <M-H> <ESC><C-w>h
+inoremap <M-L> <ESC><C-w>l
+inoremap <M-J> <ESC><C-w>j
+inoremap <M-K> <ESC><C-w>k
+
+"----------------------------------------------------------------------
+" Movement Enhancement
+"----------------------------------------------------------------------
 "Treat long lines as break lines (useful when moving around in them)
 "se swap之后，同物理行上线直接跳
 nnoremap k gk
@@ -191,82 +218,50 @@ nnoremap gk k
 nnoremap j gj
 nnoremap gj j
 
-" F1 - F6 设置
+" insert mode
+inoremap <C-h> <Left>
+inoremap <C-j> <Down>
+inoremap <C-k> <Up>
+inoremap <C-l> <Right>
+inoremap <C-a> <Home>
+inoremap <C-e> <End>
+inoremap <C-d> <del>
+inoremap <C-_> <C-k>
 
-" F1 废弃这个键,防止调出系统帮助
-" I can type :help on my own, thanks.  Protect your fat fingers from the evils of <F1>
-noremap <F1> <Esc>"
-
-" F2 行号开关，用于鼠标复制代码用
-" 为方便复制，用<F2>开启/关闭行号显示:
-function! HideNumber()
-  if(&relativenumber == &number)
-    set relativenumber! number!
-  elseif(&number)
-    set number!
-  else
-    set relativenumber!
-  endif
-  set number?
-endfunc
-nnoremap <F2> :call HideNumber()<CR>
-" F3 显示可打印字符开关
-nnoremap <F3> :set list! list?<CR>
-" F4 换行开关
-nnoremap <F4> :set wrap! wrap?<CR>
-
-" F6 语法开关，关闭语法可以加快大文件的展示
-nnoremap <F6> :exec exists('syntax_on') ? 'syn off' : 'syn on'<CR>
-
-set pastetoggle=<F5>            "    when in insert mode, press <F5> to go to
-                                "    paste mode, where you can paste mass data
-                                "    that won't be autoindented
-
-" disbale paste mode when leaving insert mode
-au InsertLeave * set nopaste
-
-" F5 set paste问题已解决, 粘贴代码前不需要按F5了
-" F5 粘贴模式paste_mode开关,用于有格式的代码粘贴
-" Automatically set paste mode in Vim when pasting in insert mode
-function! XTermPasteBegin()
-  set pastetoggle=<Esc>[201~
-  set paste
-  return ""
-endfunction
-inoremap <special> <expr> <Esc>[200~ XTermPasteBegin()
-
-" window management
-noremap <tab>h <c-w>h
-noremap <tab>j <c-w>j
-noremap <tab>k <c-w>k
-noremap <tab>l <c-w>l
-noremap <tab>w <c-w>w
-
-" insert mode as emacs
-inoremap <c-h> <left>
-inoremap <c-j> <down>
-inoremap <c-k> <up>
-inoremap <c-l> <right>
-inoremap <c-a> <home>
-inoremap <c-e> <end>
-inoremap <c-d> <del>
-inoremap <c-_> <c-k>
+" ALT系列Movement
+"----------------------------------------------------------------------
+noremap <M-h> b
+noremap <M-l> w
+noremap <M-j> gj
+noremap <M-k> gk
+noremap <M-y> d$
+inoremap <M-h> <C-Left>
+inoremap <M-l> <C-Right>
+inoremap <M-j> <C-\><C-o>gj
+inoremap <M-k> <C-\><C-o>gk
+inoremap <M-y> <C-\><C-o>d$
+cnoremap <M-h> <C-Left>
+cnoremap <M-l> <C-Right>
+cnoremap <M-b> <C-Left>
+cnoremap <M-f> <C-Right>
 
 " Go to home and end using capitalized directions
 noremap H ^
 noremap L $
 
 " faster command mode
-cnoremap <c-h> <left>
-cnoremap <c-j> <down>
-cnoremap <c-k> <up>
-cnoremap <c-l> <right>
-cnoremap <c-a> <home>
-cnoremap <c-e> <end>
-cnoremap <c-f> <c-d>
-cnoremap <c-b> <left>
-cnoremap <c-d> <del>
-cnoremap <c-_> <c-k>
+cnoremap <C-h> <Left>
+cnoremap <C-j> <Down>
+cnoremap <C-k> <Up>
+cnoremap <C-l> <Right>
+cnoremap <C-a> <Home>
+cnoremap <C-e> <End>
+cnoremap <C-f> <C-d>
+cnoremap <C-b> <Left>
+cnoremap <C-d> <del>
+cnoremap <C-_> <C-k>
+cnoremap <M-h> <C-Left>
+cnoremap <M-l> <C-Right>
 
 " Keep search pattern at the center of the screen.
 nnoremap <silent> n nzz
@@ -275,30 +270,182 @@ nnoremap <silent> * *zz
 nnoremap <silent> # #zz
 nnoremap <silent> g* g*zz
 
+"----------------------------------------------------------------------
+" Tab
+"----------------------------------------------------------------------
+" use hotkey to operate tab
+noremap <silent> <leader>tc :tabnew<CR>
+noremap <silent> <leader>tq :tabclose<CR>
+noremap <silent> <leader>tn :tabnext<CR>
+noremap <silent> <leader>tp :tabprev<CR>
+
+noremap <silent><Tab>n :tabnew<CR>
+noremap <silent><Tab>u :tabclose<CR>
+noremap <silent><Tab>. :tabn<CR>
+noremap <silent><Tab>, :tabp<CR>
+noremap <silent><Tab>f <C-i>
+noremap <silent><Tab>b <C-o>
+
+noremap <silent>\1 :tabn 1<CR>
+noremap <silent>\2 :tabn 2<CR>
+noremap <silent>\3 :tabn 3<CR>
+noremap <silent>\4 :tabn 4<CR>
+noremap <silent>\5 :tabn 5<CR>
+noremap <silent>\6 :tabn 6<CR>
+noremap <silent>\7 :tabn 7<CR>
+noremap <silent>\8 :tabn 8<CR>
+noremap <silent>\9 :tabn 9<CR>
+noremap <silent>\0 :tabn 10<CR>
+noremap <silent><S-tab> :tabnext<CR>
+inoremap <silent><S-tab> <ESC>:tabnext<CR>
+noremap <silent><C-tab> :tabprev<CR>
+inoremap <silent><C-tab> <ESC>:tabprev<CR>
+
+" <leader>+数字键 切换tab
+"----------------------------------------------------------------------
+noremap <silent><leader>1 1gt<CR>
+noremap <silent><leader>2 2gt<CR>
+noremap <silent><leader>3 3gt<CR>
+noremap <silent><leader>4 4gt<CR>
+noremap <silent><leader>5 5gt<CR>
+noremap <silent><leader>6 6gt<CR>
+noremap <silent><leader>7 7gt<CR>
+noremap <silent><leader>8 8gt<CR>
+noremap <silent><leader>9 9gt<CR>
+noremap <silent><leader>0 10gt<CR>
+
+" ALT+N 切换 tab
+"----------------------------------------------------------------------
+noremap <silent><M-1> :tabn 1<CR>
+noremap <silent><M-2> :tabn 2<CR>
+noremap <silent><M-3> :tabn 3<CR>
+noremap <silent><M-4> :tabn 4<CR>
+noremap <silent><M-5> :tabn 5<CR>
+noremap <silent><M-6> :tabn 6<CR>
+noremap <silent><M-7> :tabn 7<CR>
+noremap <silent><M-8> :tabn 8<CR>
+noremap <silent><M-9> :tabn 9<CR>
+noremap <silent><M-0> :tabn 10<CR>
+inoremap <silent><M-1> <ESC>:tabn 1<CR>
+inoremap <silent><M-2> <ESC>:tabn 2<CR>
+inoremap <silent><M-3> <ESC>:tabn 3<CR>
+inoremap <silent><M-4> <ESC>:tabn 4<CR>
+inoremap <silent><M-5> <ESC>:tabn 5<CR>
+inoremap <silent><M-6> <ESC>:tabn 6<CR>
+inoremap <silent><M-7> <ESC>:tabn 7<CR>
+inoremap <silent><M-8> <ESC>:tabn 8<CR>
+inoremap <silent><M-9> <ESC>:tabn 9<CR>
+inoremap <silent><M-0> <ESC>:tabn 10<CR>
+
+" fast file/tab actions in gui
+if has('gui_running')
+	noremap <silent><M-t> :tabnew<CR>
+	inoremap <silent><M-t> <ESC>:tabnew<CR>
+	noremap <silent><M-w> :tabclose<CR>
+	inoremap <silent><M-w> <ESC>:tabclose<CR>
+	noremap <M-s> :w<CR>
+	inoremap <M-s> <ESC>:w<CR>
+endif
+
+" TAB：左移，右移
+" 其实还可以用原生的 CTRL+PageUp, CTRL+PageDown 来切换标签
+"----------------------------------------------------------------------
+noremap <silent><leader>t, :call Tab_MoveLeft()<CR>
+noremap <silent><leader>t. :call Tab_MoveRight()<CR>
+noremap <silent><M-Left> :call Tab_MoveLeft()<CR>
+noremap <silent><M-Right> :call Tab_MoveRight()<CR>
+
+" cmd+N to switch tab quickly in macvim
+if has("gui_macvim")
+	set macmeta
+	noremap <silent><C-tab> :tabprev<CR>
+	inoremap <silent><C-tab> <ESC>:tabprev<CR>
+	noremap <silent><d-1> :tabn 1<CR>
+	noremap <silent><d-2> :tabn 2<CR>
+	noremap <silent><d-3> :tabn 3<CR>
+	noremap <silent><d-4> :tabn 4<CR>
+	noremap <silent><d-5> :tabn 5<CR>
+	noremap <silent><d-6> :tabn 6<CR>
+	noremap <silent><d-7> :tabn 7<CR>
+	noremap <silent><d-8> :tabn 8<CR>
+	noremap <silent><d-9> :tabn 9<CR>
+	noremap <silent><d-0> :tabn 10<CR>
+	inoremap <silent><d-1> <ESC>:tabn 1<CR>
+	inoremap <silent><d-2> <ESC>:tabn 2<CR>
+	inoremap <silent><d-3> <ESC>:tabn 3<CR>
+	inoremap <silent><d-4> <ESC>:tabn 4<CR>
+	inoremap <silent><d-5> <ESC>:tabn 5<CR>
+	inoremap <silent><d-6> <ESC>:tabn 6<CR>
+	inoremap <silent><d-7> <ESC>:tabn 7<CR>
+	inoremap <silent><d-8> <ESC>:tabn 8<CR>
+	inoremap <silent><d-9> <ESC>:tabn 9<CR>
+	inoremap <silent><d-0> <ESC>:tabn 10<CR>
+	noremap <silent><d-o> :browse tabnew<CR>
+	inoremap <silent><d-o> <ESC>:browse tabnew<CR>
+endif
+
+"----------------------------------------------------------------------
+" gui hotkeys - alt + ?
+"----------------------------------------------------------------------
+if g:isGUI || g:isWIN
+	noremap <silent><A-o> :call Open_Browse(2)<CR>
+	inoremap <silent><A-o> <ESC>:call Open_Browse(2)<CR>
+	noremap <S-CR>> o<ESC>
+	noremap <C-CR>> O<ESC>
+	noremap <C-S> :w<CR>
+	inoremap <C-S> <ESC>:w<CR>
+	noremap <M-Left> :call Tab_MoveLeft()<CR>
+	noremap <M-Right> :call Tab_MoveRight()<CR>
+	inoremap <M-Left> <ESC>:call Tab_MoveLeft()<CR>
+	inoremap <M-Right> <ESC>:call Tab_MoveRight()<CR>
+	noremap <M-a> ggVG
+	inoremap <M-a> <ESC>ggVG
+	noremap <M-_> :call Change_Transparency(-2)<CR>
+	noremap <M-+> :call Change_Transparency(+2)<CR>
+	if has('gui_macvim')
+		noremap <M-\|> :call Toggle_Transparency(9)<CR>
+	else
+		noremap <M-\|> :call Toggle_Transparency(15)<CR>
+	endif
+endif
+
+" Quickly edit/reload the vimrc file
+nnoremap <leader>hv :vsp $MYVIMRC<CR>
+nnoremap <leader>hd :cd g:VIMHome<CR>
+exec 'nnoremap <leader>hd :cd ' . fnameescape(g:VIMHome). '<CR>'
+
+" ctrl-enter to insert a empty line below, shift-enter to insert above
+noremap <Tab>o o<ESC>
+noremap <Tab>O O<ESC>
+
+nnoremap <M-z> za
+nnoremap <M-Z> zA
+
+" ALT+y 删除到行末
+inoremap <M-y> <C-\><C-o>d$
+
 " 去掉搜索高亮
-nnoremap <silent><leader>nh :nohl<cr>
+noremap <silent><Space>hh :nohl<CR>
+noremap <silent><BS> :nohl<CR>
 
-" for # indent, python文件中输入新行时#号注释不切回行首
-autocmd BufNewFile,BufRead *.py inoremap # X<c-h>#
-
-" Use Space scroll the window pages forwards and Shift-Space backwards
-nnoremap <space> <pagedown>
-nnoremap <s-space> <pageup>
-noremap <s-down> <pagedown>
-noremap <s-up> <pageup>
+" Use left arrow key scroll the window pages forwards and right backwards
+noremap <S-Down> <PageDown>
+noremap <S-Up> <Pageup>
+noremap <M-Space> <PageDown>
+noremap <S-Space> <Pageup>
 
 " use hotkey to change buffer
-nnoremap <silent><leader>bn :bn<cr>
-nnoremap <silent><leader>bp :bp<cr>
-nnoremap <silent><leader>bm :bm<cr>
-nnoremap <silent><leader>bv :vs<cr>
-nnoremap <silent><leader>bd :bdelete<cr>
-nnoremap <silent><leader>bl :ls<cr>
-nnoremap <silent><leader>bb :ls<cr>:b
+nnoremap <silent><leader>bn :bn<CR>
+nnoremap <silent><leader>bp :bp<CR>
+nnoremap <silent><leader>bm :bm<CR>
+nnoremap <silent><leader>bv :vs<CR>
+nnoremap <silent><leader>bd :bdelete<CR>
+nnoremap <silent><leader>bl :ls<CR>
+nnoremap <silent><leader>bb :ls<CR>:b
 nnoremap <silent><leader>be :e#<CR>
 " 使用方向键切换buffer
-noremap <s-left> :bp<CR>
-noremap <s-right> :bn<CR>
+noremap <S-Left> :bp<CR>
+noremap <S-Right> :bn<CR>
 
 " => 选中及操作改键
 
@@ -306,15 +453,15 @@ noremap <s-right> :bn<CR>
 vnoremap < <gv
 vnoremap > >gv
 
-" ctrl-enter to insert a empty line below, shift-enter to insert above
-nnoremap <tab>o o<ESC>
-nnoremap <tab>O O<ESC>
+" replace
+noremap <Space>p viw"0p
+noremap <Space>y yiw
 
 " \a                  复制所有至公共剪贴板
-nnoremap <leader>a <esc>ggVG"+y<esc>
+nnoremap <leader>a <ESC>ggVG"+y<ESC>
 
 " \v                  从公共剪贴板粘贴
-"imap <leader>v <esc>"+p
+"imap <leader>v <ESC>"+p
 nnoremap <leader>v "+p
 vnoremap <leader>v "+p
 
@@ -336,32 +483,41 @@ nnoremap <leader>q :q<CR>
 " Quickly save the current file
 nnoremap <leader>w :w<CR>
 
+
 " 交换 ' `, 使得可以快速使用'跳到marked位置
 nnoremap ' `
 nnoremap ` '
 
 " Switch CWD to the directory of the open buffer
-map <leader>cd :cd %:p:h<cr>:pwd<cr>
+map <leader>cd :cd %:p:h<CR>:pwd<CR>
 
-" Quickly edit/reload the vimrc file
-" edit vimrc/zshrc and load vimrc bindings
-nnoremap <leader>ev :vsp $MYVIMRC<CR>
-nnoremap <leader>ez :vsp ~/.zshrc<CR>
-nnoremap <leader>sv :source $MYVIMRC<CR>
 
 "==========================================
 " FileType Settings  文件类型设置
 "==========================================
 
-" 具体编辑文件类型的一般设置，比如不要 tab 等
-autocmd FileType python set tabstop=4 shiftwidth=4 expandtab ai
-autocmd FileType ruby,javascript,html,css,xml set tabstop=2 shiftwidth=2 softtabstop=2 expandtab ai
-autocmd BufRead,BufNewFile *.md,*.mkd,*.markdown set filetype=markdown.mkd
-autocmd BufRead,BufNewFile *.part set filetype=html
-autocmd BufRead,BufNewFile *.vue setlocal filetype=vue.html.javascript tabstop=2 shiftwidth=2 softtabstop=2 expandtab ai
+augroup InitFileTypesGroup
+" 清除同组的历史 autocommand
+	autocmd!
 
-" disable showmatch when use > in php
-au BufWinEnter *.php set mps-=<:>
+    autocmd FileType python set tabstop=4 shiftwidth=4 expandtab ai
+    autocmd FileType javascript,html,css,xml set tabstop=2 shiftwidth=2 softtabstop=2 expandtab ai
+    autocmd BufRead,BufNewFile *.part set filetype=html
+    
+    " C/C++ 文件使用 // 作为注释
+	autocmd FileType c,cpp setlocal commentstring=//\ %s     
+    
+    " markdown 允许自动换行
+	autocmd FileType markdown,txt setlocal wrap          
+
+	" quickfix 隐藏行号
+	autocmd FileType qf setlocal nonumber
+    
+    " disable showmatch when use > in php
+    au BufWinEnter *.php set mps-=<:>
+
+augroup END
+
 
 " 保存python文件时删除多余空格
 fun! <SID>StripTrailingWhitespaces()
@@ -370,27 +526,8 @@ fun! <SID>StripTrailingWhitespaces()
     %s/\s\+$//e
     call cursor(l, c)
 endfun
-autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl autocmd BufWritePre <buffer> :call <SID>StripTrailingWhitespaces()
-
-" 定义函数AutoSetFileHead，自动插入文件头
-autocmd BufNewFile *.sh,*.py exec ":call AutoSetFileHead()"
-function! AutoSetFileHead()
-    "如果文件类型为.sh文件
-    if &filetype == 'sh'
-        call setline(1, "\#!/bin/bash")
-    endif
-
-    "如果文件类型为python
-    if &filetype == 'python'
-        " call setline(1, "\#!/usr/bin/env python")
-        " call append(1, "\# encoding: utf-8")
-        call setline(1, "\# -*- coding: utf-8 -*-")
-    endif
-
-    normal G
-    normal o
-    normal o
-endfunc
+autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,perl 
+    \ autocmd BufWritePre <buffer> :call <SID>StripTrailingWhitespaces()
 
 " 设置可以高亮的关键字
   " Highlight TODO, FIXME, NOTE, etc.
@@ -400,6 +537,7 @@ autocmd Syntax * call matchadd('Debug', '\W\zs\(NOTE\|INFO\|IDEA\|NOTICE\)')
 "==========================================
 " others 其它设置
 "==========================================
+
 " 离开插入模式后自动关闭预览窗口
 autocmd InsertLeave * if pumvisible() == 0|pclose|endif
 
@@ -427,7 +565,6 @@ au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g
 
 " 根据后缀名指定文件类型
 au BufRead,BufNewFile *.i        set ft=c
-au BufRead,BufNewFile *.phpt     set ft=php
 au BufRead,BufNewFile *.sql      set ft=mysql
 au BufRead,BufNewFile *.txt      set ft=txt
 au BufRead,BufNewFile hosts      set ft=conf
@@ -439,8 +576,6 @@ au BufRead,BufNewFile */nginx/*.conf        set ft=nginx
 au BufRead,BufNewFile */nginx/**/*.conf     set ft=nginx
 au BufRead,BufNewFile */openresty/*.conf    set ft=nginx
 au BufRead,BufNewFile */openresty/**/*.conf set ft=nginx
-
-au BufRead,BufNewFile CMakeLists.txt set ft=cmake
 "==========================================
 " Initial Plugin 加载插件
 "==========================================
@@ -452,8 +587,26 @@ exec 'so ' . fnameescape(g:VIMHome) . '/vimrc.bundles'
 filetype plugin indent on
 
 "==========================================
-" Theme Settings  主题设置
+" Style Settings  主题设置
 "==========================================
+set ruler                           " 显示当前的行号列号
+set showcmd                         " 在状态栏显示正在输入的命令
+set cmdheight=2                     " 命令行的高度，默认为1，这里设为2
+set showmode                        " 左下角显示当前vim模式
+set scrolloff=2                     " 在上下移动光标时，光标的上方或下方至少会保留显示的行数
+set display=lastline                " 显示最后一行
+
+" set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}:%{&fenc}]\ [TYPE=%Y]\ [POS=%l,%v][%p%%]\ CWD:\ %r%{getcwd()}%h\ %{strftime(\"%d/%m/%y\ -\ %H:%M\")}
+" Always show the status line - use 2 lines for the status bar
+set laststatus=2
+
+set number                          " 显示行号
+set relativenumber                  " 开启相对行号
+set showmatch                       " 括号配对情况, 跳转并高亮一下匹配的括号
+set matchtime=2                     " How many tenths of a second to blink when matching brackets
+set list                            " 设置显示制表符等隐藏字符
+set splitright                      " 水平切割窗口时，默认在右边显示新窗口
+
 " 设置着色模式和字体
 if g:isWIN
     set guifont=等距更纱黑体\ T\ SC:h12
@@ -476,11 +629,12 @@ if g:isGUI
     set guioptions-=L          " 隐藏左侧滚动条
     set guioptions-=r          " 隐藏右侧滚动条
     set guioptions-=b          " 隐藏底部滚动条
-    set showtabline=0          " 隐藏Tab栏
+    set showtabline=2          " 隐藏Tab栏
     set cursorline             " 高亮突出当前行
     set cursorcolumn         " 高亮突出当前列
     set linespace=2
     set noimd
+    set mouse=a
 endif
 
 set background=dark
@@ -492,13 +646,45 @@ hi! link SignColumn   LineNr
 hi! link ShowMarksHLl DiffAdd
 hi! link ShowMarksHLu DiffChange
 
-" for error highlight，防止错误整行标红导致看不清
-highlight clear SpellBad
-highlight SpellBad term=standout ctermfg=1 term=underline cterm=underline
-highlight clear SpellCap
-highlight SpellCap term=underline cterm=underline
-highlight clear SpellRare
-highlight SpellRare term=underline cterm=underline
-highlight clear SpellLocal
-highlight SpellLocal term=underline cterm=underline
+"----------------------------------------------------------------------
+" 更改样式
+"----------------------------------------------------------------------
+" 更清晰的错误标注：默认一片红色背景，语法高亮都被搞没了
+" 只显示红色或者蓝色下划线或者波浪线
+hi! clear SpellBad
+hi! clear SpellCap
+hi! clear SpellRare
+hi! clear SpellLocal
+if has('gui_running')
+	hi! SpellBad gui=undercurl guisp=red
+	hi! SpellCap gui=undercurl guisp=blue
+	hi! SpellRare gui=undercurl guisp=magenta
+	hi! SpellRare gui=undercurl guisp=cyan
+else
+	hi! SpellBad term=standout ctermfg=1 term=underline cterm=underline
+	hi! SpellCap term=underline cterm=underline
+	hi! SpellRare term=underline cterm=underline
+	hi! SpellLocal term=underline cterm=underline
+endif
 
+"----------------------------------------------------------------------
+" 文件搜索和补全时忽略下面扩展名
+"----------------------------------------------------------------------
+set suffixes=.bak,~,.o,.h,.info,.swp,.obj,.pyc,.pyo,.egg-info,.class
+
+set wildignore=*.o,*.obj,*~,*.exe,*.a,*.pdb,*.lib "stuff to ignore when tab completing
+set wildignore+=*.so,*.dll,*.swp,*.egg,*.jar,*.class,*.pyc,*.pyo,*.bin,*.dex
+set wildignore+=*.zip,*.7z,*.rar,*.gz,*.tar,*.gzip,*.bz2,*.tgz,*.xz    " MacOSX/Linux
+set wildignore+=*DS_Store*,*.ipch
+set wildignore+=*.gem
+set wildignore+=*.png,*.jpg,*.gif,*.bmp,*.tga,*.pcx,*.ppm,*.img,*.iso
+set wildignore+=*.so,*.swp,*.zip,*/.Trash/**,*.pdf,*.dmg,*/.rbenv/**
+set wildignore+=*/.nx/**,*.app,*.git,.git
+set wildignore+=*.wav,*.mp3,*.ogg,*.pcm
+set wildignore+=*.mht,*.suo,*.sdf,*.jnlp
+set wildignore+=*.chm,*.epub,*.pdf,*.mobi,*.ttf
+set wildignore+=*.mp4,*.avi,*.flv,*.mov,*.mkv,*.swf,*.swc
+set wildignore+=*.ppt,*.pptx,*.docx,*.xlt,*.xls,*.xlsx,*.odt,*.wps
+set wildignore+=*.msi,*.crx,*.deb,*.vfd,*.apk,*.ipa,*.bin,*.msu
+set wildignore+=*.gba,*.sfc,*.078,*.nds,*.smd,*.smc
+set wildignore+=*.linux2,*.win32,*.darwin,*.freebsd,*.linux,*.android

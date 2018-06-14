@@ -3,10 +3,6 @@
 !.gitignore
 !/vimfiles
 
-/vimfiles/*
-!/vimfiles/autoload
-!/vimfiles/vimrc.bundles
-
 tags
 tags-*
 
