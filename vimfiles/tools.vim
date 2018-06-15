@@ -12,15 +12,25 @@ let s:winopen = 0
 let g:status_var = ""
 set wcm=<C-Z>
 
+function! PrintMap()
+    if g:isWIN
+        redir! > H:/temp/map.txt
+    else
+        redir! > ~/vim_map.txt
+    endif
+    map
+    redir END
+endfunc
+
 function! HideNumber()
-  if(&relativenumber == &number)
-    set relativenumber! number!
-  elseif(&number)
-    set number!
-  else
-    set relativenumber!
-  endif
-  set number?
+    if(&relativenumber == &number)
+        set relativenumber! number!
+    elseif(&number)
+        set number!
+    else
+        set relativenumber!
+    endif
+    set number?
 endfunc
 
 " make tabline in terminal mode

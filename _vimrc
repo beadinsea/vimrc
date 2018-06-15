@@ -175,6 +175,8 @@ nnoremap <F2> :call HideNumber()<CR>
 nnoremap <F3> :set list! list?<CR>
 " F4 换行开关
 nnoremap <F4> :set wrap! wrap?<CR>
+" F5 打印当前VIM设定的map
+nnoremap <F5> :call PrintMap()<CR>
 " F6 语法开关，关闭语法可以加快大文件的展示
 nnoremap <F6> :exec exists('syntax_on') ? 'syn off' : 'syn on'<CR>
 
@@ -192,6 +194,7 @@ noremap <Tab>j <C-w>j
 noremap <Tab>k <C-w>k
 noremap <Tab>l <C-w>l
 noremap <Tab>w <C-w>w
+noremap <Tab>i <C-w>T
 noremap <C-h> <C-w>h
 noremap <C-l> <C-w>l
 noremap <C-j> <C-w>j
@@ -199,14 +202,14 @@ noremap <C-k> <C-w>k
 
 " 窗口切换：ALT+SHIFT+hjkl
 "----------------------------------------------------------------------
-noremap <M-H> <C-w>h
-noremap <M-L> <C-w>l
-noremap <M-J> <C-w>j
-noremap <M-K> <C-w>k
-inoremap <M-H> <ESC><C-w>h
-inoremap <M-L> <ESC><C-w>l
-inoremap <M-J> <ESC><C-w>j
-inoremap <M-K> <ESC><C-w>k
+noremap <M-H> <C-w>H
+noremap <M-L> <C-w>L
+noremap <M-J> <C-w>J
+noremap <M-K> <C-w>K
+inoremap <M-H> <ESC><C-w>H
+inoremap <M-L> <ESC><C-w>L
+inoremap <M-J> <ESC><C-w>J
+inoremap <M-K> <ESC><C-w>K
 
 "----------------------------------------------------------------------
 " Movement Enhancement
@@ -274,10 +277,12 @@ nnoremap <silent> g* g*zz
 " Tab
 "----------------------------------------------------------------------
 " use hotkey to operate tab
-noremap <silent> <leader>tc :tabnew<CR>
-noremap <silent> <leader>tq :tabclose<CR>
-noremap <silent> <leader>tn :tabnext<CR>
-noremap <silent> <leader>tp :tabprev<CR>
+" noremap <silent> <leader>tc :tabnew<CR>
+" noremap <silent> <leader>tq :tabclose<CR>
+" noremap <silent> <leader>tn :tabnext<CR>
+" noremap <silent> <leader>tp :tabprev<CR>
+noremap <silent><leader>t, :call Tab_MoveLeft()<CR>
+noremap <silent><leader>t. :call Tab_MoveRight()<CR>
 
 noremap <silent><Tab>n :tabnew<CR>
 noremap <silent><Tab>u :tabclose<CR>
@@ -345,15 +350,12 @@ if has('gui_running')
 	inoremap <silent><M-w> <ESC>:tabclose<CR>
 	noremap <M-s> :w<CR>
 	inoremap <M-s> <ESC>:w<CR>
+    noremap <M-Left> :call Tab_MoveLeft()<CR>
+    noremap <M-Right> :call Tab_MoveRight()<CR>
+    inoremap <M-Left> <ESC>:call Tab_MoveLeft()<CR>
+    inoremap <M-Right> <ESC>:call Tab_MoveRight()<CR>
 endif
 
-" TAB：左移，右移
-" 其实还可以用原生的 CTRL+PageUp, CTRL+PageDown 来切换标签
-"----------------------------------------------------------------------
-noremap <silent><leader>t, :call Tab_MoveLeft()<CR>
-noremap <silent><leader>t. :call Tab_MoveRight()<CR>
-noremap <silent><M-Left> :call Tab_MoveLeft()<CR>
-noremap <silent><M-Right> :call Tab_MoveRight()<CR>
 
 " cmd+N to switch tab quickly in macvim
 if has("gui_macvim")
@@ -390,14 +392,10 @@ endif
 if g:isGUI || g:isWIN
 	noremap <silent><A-o> :call Open_Browse(2)<CR>
 	inoremap <silent><A-o> <ESC>:call Open_Browse(2)<CR>
-	noremap <S-CR>> o<ESC>
-	noremap <C-CR>> O<ESC>
+	noremap <S-CR> o<ESC>
+	noremap <C-CR> O<ESC>
 	noremap <C-S> :w<CR>
 	inoremap <C-S> <ESC>:w<CR>
-	noremap <M-Left> :call Tab_MoveLeft()<CR>
-	noremap <M-Right> :call Tab_MoveRight()<CR>
-	inoremap <M-Left> <ESC>:call Tab_MoveLeft()<CR>
-	inoremap <M-Right> <ESC>:call Tab_MoveRight()<CR>
 	noremap <M-a> ggVG
 	inoremap <M-a> <ESC>ggVG
 	noremap <M-_> :call Change_Transparency(-2)<CR>
@@ -411,8 +409,8 @@ endif
 
 " Quickly edit/reload the vimrc file
 nnoremap <leader>hv :vsp $MYVIMRC<CR>
+nnoremap <leader>he :e $MYVIMRC<CR>
 nnoremap <leader>hd :cd g:VIMHome<CR>
-exec 'nnoremap <leader>hd :cd ' . fnameescape(g:VIMHome). '<CR>'
 
 " ctrl-enter to insert a empty line below, shift-enter to insert above
 noremap <Tab>o o<ESC>
@@ -438,11 +436,8 @@ noremap <S-Space> <Pageup>
 nnoremap <silent><leader>bn :bn<CR>
 nnoremap <silent><leader>bp :bp<CR>
 nnoremap <silent><leader>bm :bm<CR>
-nnoremap <silent><leader>bv :vs<CR>
 nnoremap <silent><leader>bd :bdelete<CR>
 nnoremap <silent><leader>bl :ls<CR>
-nnoremap <silent><leader>bb :ls<CR>:b
-nnoremap <silent><leader>be :e#<CR>
 " 使用方向键切换buffer
 noremap <S-Left> :bp<CR>
 noremap <S-Right> :bn<CR>
