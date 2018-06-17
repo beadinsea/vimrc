@@ -87,6 +87,8 @@ if count(g:bundle_group, 'basic')
 	noremap <Space>ht :Startify<CR>
 	noremap <Space>hy :tabnew<CR>:Startify<CR> 
 
+    let g:NERDSpaceDelims=1
+
 	" resolve mapping conflict with nerdcommenter
     let errormarker_disablemappings = 1
 	noremap <silent><Space>em :ErrorAtCursor<CR>
@@ -163,9 +165,15 @@ endif
 " 文件类型扩展
 "----------------------------------------------------------------------
 if count(g:bundle_group, 'filetypes')
-
-	" lua 语法高亮增强
+	Plug 'vim-python/python-syntax', { 'for': ['python'] }
 	Plug 'tbastos/vim-lua', { 'for': 'lua' }
+    Plug 'plasticboy/vim-markdown', {'for': 'md'}
+    " https://github.com/suan/vim-instant-markdown
+    " npm -g install instant-markdown-d
+    " Plug 'suan/vim-instant-markdown'
+    " let g:instant_markdown_slow = 1
+    " let g:instant_markdown_autostart = 0
+    " map <F12> :InstantMarkdownPreview<CR>
 
 	" C++ 语法高亮增强，支持 11/14/17 标准
 	Plug 'octol/vim-cpp-enhanced-highlight', { 'for': ['c', 'cpp'] }
@@ -173,8 +181,7 @@ if count(g:bundle_group, 'filetypes')
 	" 额外语法文件
 	Plug 'justinmk/vim-syntax-extra', { 'for': ['c', 'bison', 'flex', 'cpp'] }
 
-	" python 语法文件增强
-	Plug 'vim-python/python-syntax', { 'for': ['python'] }
+    let g:vim_markdown_folding_disabled=1
 endif
 
 "----------------------------------------------------------------------

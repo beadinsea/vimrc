@@ -410,7 +410,7 @@ endif
 " Quickly edit/reload the vimrc file
 nnoremap <leader>hv :vsp $MYVIMRC<CR>
 nnoremap <leader>he :e $MYVIMRC<CR>
-nnoremap <leader>hd :cd g:VIMHome<CR>
+exec 'nnoremap <leader>hd :cd ' . fnameescape(g:VIMHome) . '<CR>'
 
 " ctrl-enter to insert a empty line below, shift-enter to insert above
 noremap <Tab>o o<ESC>
