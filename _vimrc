@@ -46,14 +46,16 @@ endif
 
 if g:isWIN
     let g:VIMHome = $VIM . '/vimfiles'
+    let g:LLVM = 'D:/LLVM'
+    let g:ctags = 'D:/ctags/ctags.exe'
 else
     let g:VIMHome =  '~/.vim'
+    let g:LLVM = '/somewhere'
+    let g:ctags = '/somewhere'
 endif
 let g:VIMHome = substitute(g:VIMHome, '\\', '/', 'g')
-
-if !exists('g:config_vim_tab_style')
-	let g:config_vim_tab_style = 0
-endif
+let g:LLVM = substitute(g:LLVM, '\\', '/', 'g')
+let g:ctags = substitute(g:ctags, '\\', '/', 'g')
 
 "==========================================
 " General Settings 基础设置
@@ -94,8 +96,11 @@ set t_ti= t_te=
 " 去掉输入错误的提示声音
 set novisualbell
 set noerrorbells
-
 set t_vb=
+
+set splitright
+set splitbelow
+
 set tm=500
 set title                           " change the terminal's title
 set magic                           " For regular expressions turn magic on
@@ -110,6 +115,7 @@ set whichwrap+=<,>,h,l
 set nowrap                          " 关闭自动换行
 
 " 设置搜索
+set gdefault                        " 默认替换行内所有匹配
 set hlsearch                        " 高亮search命中的文本
 set incsearch                       " 打开增量搜索模式,随着键入即时搜索
 set ignorecase                      " 搜索时忽略大小写
@@ -179,6 +185,8 @@ nnoremap <F4> :set wrap! wrap?<CR>
 nnoremap <F5> :call PrintMap()<CR>
 " F6 语法开关，关闭语法可以加快大文件的展示
 nnoremap <F6> :exec exists('syntax_on') ? 'syn off' : 'syn on'<CR>
+" Full Fucking Window ^M ending line file!
+nnoremap <F10> :%s////g<CR>
 
 "----------------------------------------------------------------------
 " window control
@@ -249,8 +257,11 @@ cnoremap <M-b> <C-Left>
 cnoremap <M-f> <C-Right>
 
 " Go to home and end using capitalized directions
-noremap H ^
-noremap L $
+nnoremap <expr>H col('.') == 1 ? '^': '0'
+nnoremap L $
+" Normal Key Map
+nnoremap U :redo<CR>
+nnoremap Q :q!<CR>
 
 " faster command mode
 cnoremap <C-h> <Left>
@@ -277,12 +288,8 @@ nnoremap <silent> g* g*zz
 " Tab
 "----------------------------------------------------------------------
 " use hotkey to operate tab
-" noremap <silent> <leader>tc :tabnew<CR>
-" noremap <silent> <leader>tq :tabclose<CR>
-" noremap <silent> <leader>tn :tabnext<CR>
-" noremap <silent> <leader>tp :tabprev<CR>
-noremap <silent><leader>t, :call Tab_MoveLeft()<CR>
-noremap <silent><leader>t. :call Tab_MoveRight()<CR>
+noremap <silent><Tab>t, :call Tab_MoveLeft()<CR>
+noremap <silent><Tab>t. :call Tab_MoveRight()<CR>
 
 noremap <silent><Tab>n :tabnew<CR>
 noremap <silent><Tab>u :tabclose<CR>
@@ -344,12 +351,12 @@ inoremap <silent><M-0> <ESC>:tabn 10<CR>
 
 " fast file/tab actions in gui
 if has('gui_running')
-	noremap <silent><M-t> :tabnew<CR>
-	inoremap <silent><M-t> <ESC>:tabnew<CR>
-	noremap <silent><M-w> :tabclose<CR>
-	inoremap <silent><M-w> <ESC>:tabclose<CR>
-	noremap <M-s> :w<CR>
-	inoremap <M-s> <ESC>:w<CR>
+    noremap <silent><M-t> :tabnew<CR>
+    inoremap <silent><M-t> <ESC>:tabnew<CR>
+    noremap <silent><M-w> :tabclose<CR>
+    inoremap <silent><M-w> <ESC>:tabclose<CR>
+    noremap <M-s> :w<CR>
+    inoremap <M-s> <ESC>:w<CR>
     noremap <M-Left> :call Tab_MoveLeft()<CR>
     noremap <M-Right> :call Tab_MoveRight()<CR>
     inoremap <M-Left> <ESC>:call Tab_MoveLeft()<CR>
@@ -359,52 +366,54 @@ endif
 
 " cmd+N to switch tab quickly in macvim
 if has("gui_macvim")
-	set macmeta
-	noremap <silent><C-tab> :tabprev<CR>
-	inoremap <silent><C-tab> <ESC>:tabprev<CR>
-	noremap <silent><d-1> :tabn 1<CR>
-	noremap <silent><d-2> :tabn 2<CR>
-	noremap <silent><d-3> :tabn 3<CR>
-	noremap <silent><d-4> :tabn 4<CR>
-	noremap <silent><d-5> :tabn 5<CR>
-	noremap <silent><d-6> :tabn 6<CR>
-	noremap <silent><d-7> :tabn 7<CR>
-	noremap <silent><d-8> :tabn 8<CR>
-	noremap <silent><d-9> :tabn 9<CR>
-	noremap <silent><d-0> :tabn 10<CR>
-	inoremap <silent><d-1> <ESC>:tabn 1<CR>
-	inoremap <silent><d-2> <ESC>:tabn 2<CR>
-	inoremap <silent><d-3> <ESC>:tabn 3<CR>
-	inoremap <silent><d-4> <ESC>:tabn 4<CR>
-	inoremap <silent><d-5> <ESC>:tabn 5<CR>
-	inoremap <silent><d-6> <ESC>:tabn 6<CR>
-	inoremap <silent><d-7> <ESC>:tabn 7<CR>
-	inoremap <silent><d-8> <ESC>:tabn 8<CR>
-	inoremap <silent><d-9> <ESC>:tabn 9<CR>
-	inoremap <silent><d-0> <ESC>:tabn 10<CR>
-	noremap <silent><d-o> :browse tabnew<CR>
-	inoremap <silent><d-o> <ESC>:browse tabnew<CR>
+    set macmeta
+    noremap <silent><C-tab> :tabprev<CR>
+    inoremap <silent><C-tab> <ESC>:tabprev<CR>
+    noremap <silent><d-1> :tabn 1<CR>
+    noremap <silent><d-2> :tabn 2<CR>
+    noremap <silent><d-3> :tabn 3<CR>
+    noremap <silent><d-4> :tabn 4<CR>
+    noremap <silent><d-5> :tabn 5<CR>
+    noremap <silent><d-6> :tabn 6<CR>
+    noremap <silent><d-7> :tabn 7<CR>
+    noremap <silent><d-8> :tabn 8<CR>
+    noremap <silent><d-9> :tabn 9<CR>
+    noremap <silent><d-0> :tabn 10<CR>
+    inoremap <silent><d-1> <ESC>:tabn 1<CR>
+    inoremap <silent><d-2> <ESC>:tabn 2<CR>
+    inoremap <silent><d-3> <ESC>:tabn 3<CR>
+    inoremap <silent><d-4> <ESC>:tabn 4<CR>
+    inoremap <silent><d-5> <ESC>:tabn 5<CR>
+    inoremap <silent><d-6> <ESC>:tabn 6<CR>
+    inoremap <silent><d-7> <ESC>:tabn 7<CR>
+    inoremap <silent><d-8> <ESC>:tabn 8<CR>
+    inoremap <silent><d-9> <ESC>:tabn 9<CR>
+    inoremap <silent><d-0> <ESC>:tabn 10<CR>
+    noremap <silent><d-o> :browse tabnew<CR>
+    inoremap <silent><d-o> <ESC>:browse tabnew<CR>
 endif
 
 "----------------------------------------------------------------------
 " gui hotkeys - alt + ?
 "----------------------------------------------------------------------
 if g:isGUI || g:isWIN
-	noremap <silent><A-o> :call Open_Browse(2)<CR>
-	inoremap <silent><A-o> <ESC>:call Open_Browse(2)<CR>
-	noremap <S-CR> o<ESC>
-	noremap <C-CR> O<ESC>
-	noremap <C-S> :w<CR>
-	inoremap <C-S> <ESC>:w<CR>
-	noremap <M-a> ggVG
-	inoremap <M-a> <ESC>ggVG
-	noremap <M-_> :call Change_Transparency(-2)<CR>
-	noremap <M-+> :call Change_Transparency(+2)<CR>
-	if has('gui_macvim')
-		noremap <M-\|> :call Toggle_Transparency(9)<CR>
-	else
-		noremap <M-\|> :call Toggle_Transparency(15)<CR>
-	endif
+    noremap <silent><A-o> :call Open_Browse(2)<CR>
+    inoremap <silent><A-o> <ESC>:call Open_Browse(2)<CR>
+    noremap <S-CR> o<ESC>
+    noremap <C-CR> O<ESC>
+    inoremap <S-CR> <C-o>o
+    noremap <C-CR> <C-o>O
+    noremap <C-S> :w<CR>
+    inoremap <C-S> <ESC>:w<CR>
+    noremap <M-a> ggVG
+    inoremap <M-a> <ESC>ggVG
+    noremap <M-_> :call Change_Transparency(-2)<CR>
+    noremap <M-+> :call Change_Transparency(+2)<CR>
+    if has('gui_macvim')
+        noremap <M-\|> :call Toggle_Transparency(9)<CR>
+    else
+        noremap <M-\|> :call Toggle_Transparency(15)<CR>
+    endif
 endif
 
 " Quickly edit/reload the vimrc file
@@ -416,14 +425,16 @@ exec 'nnoremap <leader>hd :cd ' . fnameescape(g:VIMHome) . '<CR>'
 noremap <Tab>o o<ESC>
 noremap <Tab>O O<ESC>
 
+noremap <Tab>i :Ex<CR>
+
 nnoremap <M-z> za
 nnoremap <M-Z> zA
 
 " ALT+y 删除到行末
 inoremap <M-y> <C-\><C-o>d$
 
+noremap <silent><Space>hh <C-^>
 " 去掉搜索高亮
-noremap <silent><Space>hh :nohl<CR>
 noremap <silent><BS> :nohl<CR>
 
 " Use left arrow key scroll the window pages forwards and right backwards
@@ -438,6 +449,7 @@ nnoremap <silent><leader>bp :bp<CR>
 nnoremap <silent><leader>bm :bm<CR>
 nnoremap <silent><leader>bd :bdelete<CR>
 nnoremap <silent><leader>bl :ls<CR>
+nnoremap <silent><leader>e :e#<CR>
 " 使用方向键切换buffer
 noremap <S-Left> :bp<CR>
 noremap <S-Right> :bn<CR>
@@ -484,35 +496,41 @@ nnoremap ' `
 nnoremap ` '
 
 " Switch CWD to the directory of the open buffer
-map <leader>cd :cd %:p:h<CR>:pwd<CR>
-
+noremap <leader>cd :cd %:p:h<CR>:pwd<CR>
 
 "==========================================
 " FileType Settings  文件类型设置
 "==========================================
+" 根据后缀名指定文件类型
+autocmd BufRead,BufNewFile *.i        set ft=c
+autocmd BufRead,BufNewFile *.txt      set ft=txt
+autocmd BufRead,BufNewFile *.sql      set ft=mysql
+autocmd BufRead,BufNewFile hosts      set ft=conf
+autocmd BufRead,BufNewFile *.conf     set ft=dosini
+autocmd BufRead,BufNewFile http*.conf set ft=apache
+autocmd BufRead,BufNewFile *.ini      set ft=dosini
+autocmd BufRead,BufNewFile CMakeLists.txt set ft=cmake
+autocmd BufRead,BufNewFile *.part set filetype=html
 
-augroup InitFileTypesGroup
-" 清除同组的历史 autocommand
-	autocmd!
+autocmd BufRead,BufNewFile */nginx/*.conf        set ft=nginx
+autocmd BufRead,BufNewFile */nginx/**/*.conf     set ft=nginx
+autocmd BufRead,BufNewFile */openresty/*.conf    set ft=nginx
+autocmd BufRead,BufNewFile */openresty/**/*.conf set ft=nginx
 
-    autocmd FileType python set tabstop=4 shiftwidth=4 expandtab ai
-    autocmd FileType javascript,html,css,xml set tabstop=2 shiftwidth=2 softtabstop=2 expandtab ai
-    autocmd BufRead,BufNewFile *.part set filetype=html
-    
-    " C/C++ 文件使用 // 作为注释
-	autocmd FileType c,cpp setlocal commentstring=//\ %s     
-    
-    " markdown 允许自动换行
-	autocmd FileType markdown,txt setlocal wrap          
+autocmd FileType python set tabstop=4 shiftwidth=4 expandtab ai
+autocmd FileType javascript,html,css,xml set tabstop=2 shiftwidth=2 softtabstop=2 expandtab ai
 
-	" quickfix 隐藏行号
-	autocmd FileType qf setlocal nonumber
-    
-    " disable showmatch when use > in php
-    au BufWinEnter *.php set mps-=<:>
+" C/C++ 文件使用 // 作为注释
+autocmd FileType c,cpp setlocal commentstring=//\ %s     
 
-augroup END
+" markdown 允许自动换行
+autocmd FileType markdown,txt setlocal wrap          
 
+" quickfix 隐藏行号
+autocmd FileType qf setlocal nonumber
+
+" disable showmatch when use > in php
+autocmd BufWinEnter *.php set mps-=<:>
 
 " 保存python文件时删除多余空格
 fun! <SID>StripTrailingWhitespaces()
@@ -528,6 +546,13 @@ autocmd FileType c,cpp,java,go,php,javascript,puppet,python,rust,twig,xml,yml,pe
   " Highlight TODO, FIXME, NOTE, etc.
 autocmd Syntax * call matchadd('Todo',  '\W\zs\(TODO\|FIXME\|CHANGED\|DONE\|XXX\|BUG\|HACK\)')
 autocmd Syntax * call matchadd('Debug', '\W\zs\(NOTE\|INFO\|IDEA\|NOTICE\)')
+
+
+let g:clang_format_path = g:LLVM . '/bin/clang-format.exe'
+exec 'noremap <M-k> :py3file ' . g:LLVM . '/share/clang/clang-format.py<CR>'
+exec 'inoremap <M-k> <C-o>:py3file ' . g:LLVM . '/share/clang/clang-format.py<CR>'
+noremap <M-K> :call FormatFile()<CR>
+inoremap <M-K> <C-o>:call FormatFile()<CR>
 
 "==========================================
 " others 其它设置
@@ -558,28 +583,11 @@ inoremap <expr> <PageUp>   pumvisible() ? "\<PageUp>\<C-p>\<C-n>" : "\<PageUp>"
 " 打开自动定位到最后编辑的位置, 需要确认 .viminfo 当前用户可写
 au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
 
-" 根据后缀名指定文件类型
-au BufRead,BufNewFile *.i        set ft=c
-au BufRead,BufNewFile *.sql      set ft=mysql
-au BufRead,BufNewFile *.txt      set ft=txt
-au BufRead,BufNewFile hosts      set ft=conf
-au BufRead,BufNewFile *.conf     set ft=dosini
-au BufRead,BufNewFile http*.conf set ft=apache
-au BufRead,BufNewFile *.ini      set ft=dosini
-
-au BufRead,BufNewFile */nginx/*.conf        set ft=nginx
-au BufRead,BufNewFile */nginx/**/*.conf     set ft=nginx
-au BufRead,BufNewFile */openresty/*.conf    set ft=nginx
-au BufRead,BufNewFile */openresty/**/*.conf set ft=nginx
 "==========================================
 " Initial Plugin 加载插件
 "==========================================
-
 " install bundles
 exec 'so ' . fnameescape(g:VIMHome) . '/vimrc.bundles'
-
-" ensure ftdetect et al work by including this after the bundle stuff
-filetype plugin indent on
 
 "==========================================
 " Style Settings  主题设置
@@ -590,11 +598,7 @@ set cmdheight=2                     " 命令行的高度，默认为1，这里�
 set showmode                        " 左下角显示当前vim模式
 set scrolloff=2                     " 在上下移动光标时，光标的上方或下方至少会保留显示的行数
 set display=lastline                " 显示最后一行
-
-" set statusline=%F%m%r%h%w\ [FORMAT=%{&ff}:%{&fenc}]\ [TYPE=%Y]\ [POS=%l,%v][%p%%]\ CWD:\ %r%{getcwd()}%h\ %{strftime(\"%d/%m/%y\ -\ %H:%M\")}
-" Always show the status line - use 2 lines for the status bar
-set laststatus=2
-
+set laststatus=2                    " Always show the status line
 set number                          " 显示行号
 set relativenumber                  " 开启相对行号
 set showmatch                       " 括号配对情况, 跳转并高亮一下匹配的括号
@@ -625,23 +629,27 @@ if g:isGUI
     set guioptions-=r          " 隐藏右侧滚动条
     set guioptions-=b          " 隐藏底部滚动条
     set showtabline=2          " 隐藏Tab栏
+    set guitablabel=%t
     set cursorline             " 高亮突出当前行
-    set cursorcolumn         " 高亮突出当前列
+    set cursorcolumn           " 高亮突出当前列
     set linespace=2
     set noimd
     set mouse=a
 endif
 
 set background=dark
-colorscheme molokai
 set t_Co=256
+if g:isGUI
+    colorscheme solarized
+else
+    colorscheme molokai
+endif
 
 " 设置标记一列的背景颜色和数字一行颜色一致
 hi! link SignColumn   LineNr
 hi! link ShowMarksHLl DiffAdd
 hi! link ShowMarksHLu DiffChange
 
-"----------------------------------------------------------------------
 " 更改样式
 "----------------------------------------------------------------------
 " 更清晰的错误标注：默认一片红色背景，语法高亮都被搞没了
@@ -651,17 +659,34 @@ hi! clear SpellCap
 hi! clear SpellRare
 hi! clear SpellLocal
 if has('gui_running')
-	hi! SpellBad gui=undercurl guisp=red
-	hi! SpellCap gui=undercurl guisp=blue
-	hi! SpellRare gui=undercurl guisp=magenta
-	hi! SpellRare gui=undercurl guisp=cyan
+    hi! SpellBad gui=undercurl guisp=red
+    hi! SpellCap gui=undercurl guisp=blue
+    hi! SpellRare gui=undercurl guisp=magenta
+    hi! SpellRare gui=undercurl guisp=cyan
 else
-	hi! SpellBad term=standout ctermfg=1 term=underline cterm=underline
-	hi! SpellCap term=underline cterm=underline
-	hi! SpellRare term=underline cterm=underline
-	hi! SpellLocal term=underline cterm=underline
+    hi! SpellBad term=standout ctermfg=1 term=underline cterm=underline
+    hi! SpellCap term=underline cterm=underline
+    hi! SpellRare term=underline cterm=underline
+    hi! SpellLocal term=underline cterm=underline
 endif
 
+" Status Line
+"----------------------------------------------------------------------
+set statusline=%<%1*[▶%n:%{Buf_total_num()}]%*
+set statusline+=%2*\ %{File_size(@%)}\ %*
+set statusline+=%3*\ %F\ %*
+set statusline+=%4*『\ %{exists('g:loaded_ale')?LinterStatus():''}』%{exists('g:loaded_fugitive')?fugitive#statusline():''}%*
+set statusline+=%5*\ %m%r%y\ %*
+set statusline+=%=%6*\ %{&ff}\ \|\ %{\"\".(&fenc==\"\"?&enc:&fenc).((exists(\"+bomb\")\ &&\ &bomb)?\",B\":\"\").\"\ \|\"}\ %-14.(%l:%c%V%)%*
+set statusline+=%7*\ %P\ %*
+" default bg for statusline is 236 in space-vim-dark
+hi User1 cterm=bold ctermfg=232 ctermbg=179
+hi User2 cterm=None ctermfg=251 ctermbg=240
+hi User3 cterm=bold ctermfg=169 ctermbg=239
+hi User4 cterm=None ctermfg=208 ctermbg=238
+hi User5 cterm=None ctermfg=246 ctermbg=237
+hi User6 cterm=None ctermfg=250 ctermbg=238
+hi User7 cterm=None ctermfg=249 ctermbg=240
 "----------------------------------------------------------------------
 " 文件搜索和补全时忽略下面扩展名
 "----------------------------------------------------------------------
