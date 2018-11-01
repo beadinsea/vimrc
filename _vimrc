@@ -3,7 +3,7 @@
 " Version: 0.1
 " Email: beadinsea@163.com
 " ReadMe: README.md
-" Last_modify: 2018-06-13
+" Last_modify: 2018-07-01
 " Sections:
 "       -> Set Enviromental Variables 设置环境变量
 "       -> General Settings 基础设置
@@ -47,15 +47,15 @@ endif
 if g:isWIN
     let g:VIMHome = $VIM . '/vimfiles'
     let g:LLVM = 'D:/LLVM'
-    let g:ctags = 'D:/ctags/ctags.exe'
+    let g:Ctags = g:VIMHome . '/ctags/ctags.exe'
 else
     let g:VIMHome =  '~/.vim'
     let g:LLVM = '/somewhere'
-    let g:ctags = '/somewhere'
+    let g:Ctags = '/somewhere'
 endif
 let g:VIMHome = substitute(g:VIMHome, '\\', '/', 'g')
 let g:LLVM = substitute(g:LLVM, '\\', '/', 'g')
-let g:ctags = substitute(g:ctags, '\\', '/', 'g')
+let g:Ctags = substitute(g:Ctags, '\\', '/', 'g')
 
 "==========================================
 " General Settings 基础设置
@@ -156,7 +156,8 @@ set fileformats=unix,mac,dos        " Use Unix as the standard file type
 if g:isWIN
     source $VIMRUNTIME/delmenu.vim
     source $VIMRUNTIME/menu.vim
-    language messages zh_CN.utf-8
+    language messages en_US.utf-8
+    " language messages zh_CN.utf-8
 endif
 
 set termencoding=utf-8              " 只影响普通模式 (非图形界面) 下的 Vim
@@ -176,17 +177,17 @@ exec 'so ' . fnameescape(g:VIMHome) . '/tools.vim'
 " F1 废弃这个键,防止调出系统帮助
 noremap <F1> <ESC>"
 " F2 行号开关，用于鼠标复制代码用
-nnoremap <F2> :call HideNumber()<CR>
+noremap <F2> :call HideNumber()<CR>
 " F3 显示可打印字符开关
-nnoremap <F3> :set list! list?<CR>
+noremap <F3> :set list! list?<CR>
 " F4 换行开关
-nnoremap <F4> :set wrap! wrap?<CR>
+noremap <F4> :set wrap! wrap?<CR>
 " F5 打印当前VIM设定的map
-nnoremap <F5> :call PrintMap()<CR>
+noremap <F5> :call PrintMap()<CR>
 " F6 语法开关，关闭语法可以加快大文件的展示
-nnoremap <F6> :exec exists('syntax_on') ? 'syn off' : 'syn on'<CR>
+noremap <F6> :exec exists('syntax_on') ? 'syn off' : 'syn on'<CR>
 " Full Fucking Window ^M ending line file!
-nnoremap <F10> :%s////g<CR>
+noremap <F10> :%s///g<CR>
 
 "----------------------------------------------------------------------
 " window control
@@ -402,24 +403,18 @@ if g:isGUI || g:isWIN
     noremap <S-CR> o<ESC>
     noremap <C-CR> O<ESC>
     inoremap <S-CR> <C-o>o
-    noremap <C-CR> <C-o>O
+    inoremap <C-CR> <C-o>O
     noremap <C-S> :w<CR>
     inoremap <C-S> <ESC>:w<CR>
     noremap <M-a> ggVG
     inoremap <M-a> <ESC>ggVG
-    noremap <M-_> :call Change_Transparency(-2)<CR>
-    noremap <M-+> :call Change_Transparency(+2)<CR>
-    if has('gui_macvim')
-        noremap <M-\|> :call Toggle_Transparency(9)<CR>
-    else
-        noremap <M-\|> :call Toggle_Transparency(15)<CR>
-    endif
 endif
 
 " Quickly edit/reload the vimrc file
 nnoremap <leader>hv :vsp $MYVIMRC<CR>
 nnoremap <leader>he :e $MYVIMRC<CR>
 exec 'nnoremap <leader>hd :cd ' . fnameescape(g:VIMHome) . '<CR>'
+exec 'nnoremap <leader>hb :e ' . fnameescape(g:VIMHome) . '/vimrc.bundles<CR>'
 
 " ctrl-enter to insert a empty line below, shift-enter to insert above
 noremap <Tab>o o<ESC>
@@ -435,13 +430,13 @@ inoremap <M-y> <C-\><C-o>d$
 
 noremap <silent><Space>hh <C-^>
 " 去掉搜索高亮
-noremap <silent><BS> :nohl<CR>
+noremap <silent><Space><BS> :nohl<CR>
 
 " Use left arrow key scroll the window pages forwards and right backwards
 noremap <S-Down> <PageDown>
 noremap <S-Up> <Pageup>
-noremap <M-Space> <PageDown>
-noremap <S-Space> <Pageup>
+noremap <S-Space> <PageDown>
+noremap <M-Space> <Pageup>
 
 " use hotkey to change buffer
 nnoremap <silent><leader>bn :bn<CR>
@@ -521,10 +516,10 @@ autocmd FileType python set tabstop=4 shiftwidth=4 expandtab ai
 autocmd FileType javascript,html,css,xml set tabstop=2 shiftwidth=2 softtabstop=2 expandtab ai
 
 " C/C++ 文件使用 // 作为注释
-autocmd FileType c,cpp setlocal commentstring=//\ %s     
+autocmd FileType c,cpp setlocal commentstring=//\ %s
 
 " markdown 允许自动换行
-autocmd FileType markdown,txt setlocal wrap          
+autocmd FileType markdown,txt setlocal wrap
 
 " quickfix 隐藏行号
 autocmd FileType qf setlocal nonumber
@@ -610,10 +605,11 @@ set splitright                      " 水平切割窗口时，默认在右边显
 if g:isWIN
     set guifont=等距更纱黑体\ T\ SC:h12
     set guifontwide=等距更纱黑体\ T\ SC:h12
+    " set rop=type:directx
 elseif g:isMAC
-    set guifont=Monaco:h14
+    set guifont=Monaco:h13
 else
-    set guifont=等距更纱黑体\ T\ SC\ 12
+    set guifont=等距更纱黑体\ T\ SC\ 13
 endif
 
 " 使用 GUI 界面时的设置

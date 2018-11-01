@@ -64,7 +64,7 @@ function! PrintMap()
     else
         redir! > ~/vim_map.txt
     endif
-    map
+    verbose map
     redir END
 endfunc
 

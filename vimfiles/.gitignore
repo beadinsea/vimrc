@@ -1,5 +1,5 @@
 bundle/
 cache/
-UltiSnips/*
+snippets/*
 viminfo
-!UltiSnips/*_my.snippets
+!snippets/*_my.snippets

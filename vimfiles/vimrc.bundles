@@ -9,7 +9,7 @@ if !exists('g:bundle_group')
     let g:bundle_group += ['nerdtree', 'ale', 'vimwiki', 'echodoc']
     let g:bundle_group += ['leaderf']
     let g:bundle_group += ['json']
-    let g:bundle_group += ['ycm']
+    " let g:bundle_group += ['ycm']
 endif
 
 " let s:home = fnamemodify(resolve(expand('<sfile>:p')), ':h')
@@ -60,9 +60,10 @@ if count(g:bundle_group, 'basic')
     Plug 'tpope/vim-fugitive'
     Plug 'tpope/vim-surround'
     Plug 'xolox/vim-misc'
-    Plug 'SirVer/ultisnips'
-    " Plug 'honza/vim-snippets'
     Plug 'scrooloose/nerdcommenter'
+    Plug 'MarcWeber/vim-addon-mw-utils'
+	Plug 'tomtom/tlib_vim'
+	Plug 'garbas/vim-snipmate'
     Plug 't9md/vim-choosewin'
 
     " 用于在侧边符号栏显示 marks （ma-mz 记录的位置）
@@ -74,6 +75,10 @@ if count(g:bundle_group, 'basic')
     " 使用 ALT+E 来选择窗口
     nmap <m-e> <Plug>(choosewin)
 
+    let g:startify_lists = [
+          \ { 'type': 'files',     'header': ['   MRU']            },
+          \ { 'type': 'sessions',  'header': ['   Sessions']       },
+          \ ]
     let g:startify_session_dir = g:VIMHome . '/cache'
     noremap <Space>hy :Startify<CR>
     noremap <Space>ht :tabnew<CR>:Startify<CR> 
@@ -93,11 +98,26 @@ if count(g:bundle_group, 'basic')
             \ 'git': 'git diff --no-color --diff-algorithm=histogram --no-ext-diff -U0 -- %f',
             \}
 
-    let g:UltiSnipsExpandTrigger       = "<Tab>"
-    let g:UltiSnipsJumpForwardTrigger  = "<Tab>"
-    let g:UltiSnipsJumpBackwardTrigger = "<S-Tab>"
-    let g:UltiSnipsSnippetDirectories  = [g:VIMHome . '/UltiSnips']
-    let g:UltiSnipsSnippetsDir = g:VIMHome . '/UltiSnips'
+    let g:snips_author                              = 'Stephen'
+    let g:snipMate                                  = {}
+    let g:snipMate.no_default_aliases               = 1
+    let g:snipMate.override                         = 1
+    let g:snipMate.snippet_version                  = 1
+    let g:snipMate.description_in_completion        = 1
+    " 设置补全项之间的继承关系，比如 C语言继承 C++ 的补全
+    let g:snipMate.scope_aliases                    = {}
+    let g:snipMate.scope_aliases['c']               = 'cpp'
+    let g:snipMate.scope_aliases['gohtmltmpl']      = 'html,gohtmltmpl'
+    let g:snipMate.scope_aliases['javascript']      = 'js_*,javascript'
+    let g:snipMate.scope_aliases['typescript']      = 'javascript,typescript'
+    let g:snipMate.scope_aliases['javascript.jsx']  = 'javascript,jsx'
+    let g:snipMate.scope_aliases['htmldjango']      = 'html,htmldjango'
+    let g:snipMate.scope_aliases['jst']             = 'html,jst'
+    let g:snipMate.scope_aliases['vue']             = 'html,vue'
+    let g:snipMate.scope_aliases['scss']            = 'css,scss'
+    let g:snipMate.scope_aliases['less']            = 'css,less'
+    let g:snipMate.scope_aliases['xhtml']           = 'html'
+    let g:snipMate.scope_aliases['html']            = 'tpl_*,html'
 endif
 
 "----------------------------------------------------------------------
@@ -121,7 +141,7 @@ if count(g:bundle_group, 'enhanced')
 
     Plug 'ludovicchabant/vim-gutentags'
 
-    let g:gutentags_ctags_executable = g:ctags
+    let g:gutentags_ctags_executable = g:Ctags
     " let g:gutentags_dont_load = 1
     let g:gutentags_project_root = ['.root']
     let g:gutentags_ctags_tagfile = '.tags'
@@ -194,37 +214,37 @@ endif
 "----------------------------------------------------------------------
 " airline
 "----------------------------------------------------------------------
-" if count(g:bundle_group, 'airline')
-    " Plug 'vim-airline/vim-airline'
-    " Plug 'vim-airline/vim-airline-themes'
+if count(g:bundle_group, 'airline')
+    Plug 'vim-airline/vim-airline'
+    Plug 'vim-airline/vim-airline-themes'
 
-    " if !exists('g:airline_symbols')
-        " let g:airline_symbols = {}
-    " endif
+    if !exists('g:airline_symbols')
+        let g:airline_symbols = {}
+    endif
 
-    " let g:airline_exclude_preview = 1
-    " let g:airline_section_b = '%n'
-    " let g:airline#extensions#branch#enabled = 0
-    " let g:airline#extensions#syntastic#enabled = 0
-    " let g:airline#extensions#fugitiveline#enabled = 0
-    " let g:airline#extensions#csv#enabled = 0
-    " let g:airline#extensions#vimagit#enabled = 0
-    " let g:airline_theme           = 'badwolf'      " 设置主题
-    " let g:airline_powerline_fonts = 1              " 关闭自定义字体
-    " " unicode symbols
-    " let g:airline_left_sep = '»'
-    " let g:airline_left_sep = '▶'
-    " let g:airline_right_sep = '«'
-    " let g:airline_right_sep = '◀'
-    " let g:airline_symbols.linenr = '␊'
-    " let g:airline_symbols.linenr = '␤'
-    " let g:airline_symbols.linenr = '¶'
-    " let g:airline_symbols.branch = '⎇'
-    " let g:airline_symbols.paste = 'ρ'
-    " let g:airline_symbols.paste = 'Þ'
-    " let g:airline_symbols.paste = '∥'
-    " let g:airline_symbols.whitespace = 'Ξ'
-" endif
+    let g:airline_exclude_preview = 1
+    let g:airline_section_b = '%n'
+    let g:airline#extensions#branch#enabled = 0
+    let g:airline#extensions#syntastic#enabled = 0
+    let g:airline#extensions#fugitiveline#enabled = 0
+    let g:airline#extensions#csv#enabled = 0
+    let g:airline#extensions#vimagit#enabled = 0
+    let g:airline_theme           = 'badwolf'      " 设置主题
+    let g:airline_powerline_fonts = 1              " 关闭自定义字体
+    " unicode symbols
+    let g:airline_left_sep = '»'
+    let g:airline_left_sep = '▶'
+    let g:airline_right_sep = '«'
+    let g:airline_right_sep = '◀'
+    let g:airline_symbols.linenr = '␊'
+    let g:airline_symbols.linenr = '␤'
+    let g:airline_symbols.linenr = '¶'
+    let g:airline_symbols.branch = '⎇'
+    let g:airline_symbols.paste = 'ρ'
+    let g:airline_symbols.paste = 'Þ'
+    let g:airline_symbols.paste = '∥'
+    let g:airline_symbols.whitespace = 'Ξ'
+endif
 
 "----------------------------------------------------------------------
 " NERDTree
@@ -265,12 +285,31 @@ if count(g:bundle_group, 'ale')
     let g:ale_completion_delay = 500
     let g:ale_echo_delay = 20
     let g:ale_lint_delay = 500
-    let g:ale_echo_msg_format = '[%linter%] %code: %%s'
 
     " 设定检测的时机：normal 模式文字改变，或者离开 insert模式
     " 禁用默认 INSERT 模式下改变文字也触发的设置，太频繁外，还会让补全窗闪烁
     let g:ale_lint_on_text_changed = 'normal'
     let g:ale_lint_on_insert_leave = 1
+
+    let g:ale_sign_column_always = 1
+    let g:ale_set_highlights = 0
+    "自定义error和warning图标
+    let g:ale_sign_error = '✗'
+    let g:ale_sign_warning = '⚡'
+    "
+    "在vim自带的状态栏中整合ale
+    let g:ale_statusline_format = ['✗ %d', '⚡ %d', '✔ OK']
+    "显示Linter名称,出错或警告等相关信息
+    let g:ale_echo_msg_error_str = 'E'
+    let g:ale_echo_msg_warning_str = 'W'
+    let g:ale_echo_msg_format = '[%linter%] %code: %%s'
+
+    "使用clang对c和c++进行语法检查，对python使用pylint进行语法检查
+    let g:ale_linters = {
+        \   'c++': ['clang'],
+        \   'c': ['clang'],
+        \   'python': ['pylint'],
+        \}
 endif
 
 "----------------------------------------------------------------------
@@ -279,8 +318,8 @@ endif
 if count(g:bundle_group, 'vimwiki')
     Plug 'vimwiki/vimwiki'
     autocmd FileType vimwiki setlocal wrap " 折行
-    nmap <leader>wa <esc>\ww<esc>:VimwikiAll2HTML<cr>:qa<cr>
-    vmap <leader>wa <esc>\ww<esc>:VimwikiAll2HTML<cr>:qa<cr>
+    nmap <leader>wa <ESC><leader>ww<ESC>:VimwikiAll2HTML<CR>
+    vmap <leader>wa <ESC><leader>ww<ESC>:VimwikiAll2HTML<CR>
 
     let g:vimwiki_w32_dir_enc     = 'utf-8'  " 设置编码
     let g:vimwiki_use_mouse       = 1        " 使用鼠标映射
@@ -301,8 +340,8 @@ if count(g:bundle_group, 'vimwiki')
         let blog.path_html     = '~/mysite/html/'
         let blog.template_path = '~/mysite/templates/'
     endif
-    let blog.template_default  = 'code'
-    let blog.template_ext      = '.html'
+    let blog.template_default  = 'template'
+    let blog.template_ext      = '.tpl'
     let blog.auto_export       = 1
     let blog.nested_syntaxes = {'python': 'python', 'c++': 'cpp', 'java': 'java', 'sh': 'sh',
         \ 'viml': 'vim', 'xml': 'xml'
@@ -336,9 +375,10 @@ if count(g:bundle_group, 'leaderf')
         let g:Lf_StlSeparator = { 'left': '', 'right': '', 'font': '' }
         " 如何识别项目目录，从当前文件目录向父目录递归直到碰到下面的文件/目录
         let g:Lf_RootMarkers = ['.project', '.root', '.svn', '.git']
-        let g:Lf_WorkingDirectoryMode = 'Ac'
+        let g:Lf_WorkingDirectoryMode = 'AF'
         let g:Lf_WindowHeight = 0.30
         let g:Lf_CacheDirectory = g:VIMHome . '/cache'
+        let g:Lf_Ctags = g:Ctags
 
         " 显示绝对路径
         let g:Lf_ShowRelativePath = 0
@@ -354,10 +394,10 @@ if count(g:bundle_group, 'leaderf')
 
         " MRU 文件忽略扩展名
         let g:Lf_MruFileExclude = ['*.so', '*.exe', '*.py[co]', '*.sw?', '~$*', '*.bak', '*.tmp', '*.dll']
-        let g:Lf_StlColorscheme = 'powerline'
+        " let g:Lf_StlColorscheme = 'powerline'
 
         " 禁用 function/buftag 的预览功能，可以手动用 p 预览
-        let g:Lf_PreviewResult = {'Function':0, 'BufTag':0}
+       " let g:Lf_PreviewResult = {'Function':0, 'BufTag':0}
     endif
 endif
 
@@ -380,7 +420,7 @@ if count(g:bundle_group, 'ycm')
     let g:ycm_key_list_previous_completion = ['<Up>']
     let g:ycm_complete_in_comments = 1  "在注释输入中也能补全
     let g:ycm_complete_in_strings = 1   "在字符串输入中也能补全
-    let g:ycm_use_ultisnips_completer = 1 "提示UltiSnips
+    let g:ycm_use_ultisnips_completer = 0 "提示UltiSnips
     let g:ycm_collect_identifiers_from_tags_files = 1
     let g:ycm_seed_identifiers_with_syntax=1        " 开启语法关键字补全
     let g:ycm_key_list_stop_completion = ['<CR>']   " 回车作为选中
@@ -402,6 +442,8 @@ if count(g:bundle_group, 'ycm')
                 \ }
     if !empty(glob(g:VIMHome . "/bundle/YouCompleteMe/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py"))
         let g:ycm_global_ycm_extra_conf = g:VIMHome . "/bundle/YouCompleteMe/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py"
+    elseif !empty(glob(g:VIMHome . "/bundle/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py"))
+        let g:ycm_global_ycm_extra_conf = g:VIMHome . "/bundle/YouCompleteMe/third_party/ycmd/.ycm_extra_conf.py"
     endif
 
     " 直接触发自动补全 insert模式下
